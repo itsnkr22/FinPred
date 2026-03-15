@@ -1,0 +1,14 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.1
+pydantic-settings==2.7.1
+python-dotenv==1.0.1
+openai==1.59.5
+anthropic==0.42.0
+camel-ai[all]==0.2.16
+zep-cloud==2.0.2
+websockets==14.1
+httpx==0.28.1
+python-multipart==0.0.20
