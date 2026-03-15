@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class EnvironmentVars(BaseModel):
     market_volatility: str = Field(default="normal", description="low | normal | high | extreme")
-    sector_focus: str = Field(default="general", description="tech | finance | energy | crypto | general")
+    sector_focus: str = Field(default="general", description="tech | finance | energy | crypto | commodities | general")
     election_year: bool = False
     fed_stance: str = Field(default="neutral", description="hawkish | neutral | dovish")
 

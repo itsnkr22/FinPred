@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import agents, analytics, ingestion, scenarios, simulations
+from app.api import agents, analytics, commodities, ingestion, scenarios, simulations
 from app.config import settings
 
 
@@ -32,6 +32,7 @@ app.include_router(simulations.router, prefix="/api/v1/simulations", tags=["simu
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["analytics"])
 app.include_router(ingestion.router, prefix="/api/v1/ingestion", tags=["ingestion"])
+app.include_router(commodities.router, prefix="/api/v1/commodities", tags=["commodities"])
 
 
 @app.get("/health")

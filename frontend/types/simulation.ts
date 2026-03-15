@@ -35,11 +35,20 @@ export interface TickMetrics {
   interaction_count: number;
 }
 
+export interface TickCommodity {
+  commodity: string;
+  name: string;
+  price: number;
+  change: number;
+  change_percent: number;
+}
+
 export interface TickUpdate {
   type: "tick_update";
   tick: number;
   interactions: TickInteraction[];
   metrics: TickMetrics;
+  commodities?: TickCommodity[];
 }
 
 export interface TickInteraction {

@@ -17,6 +17,11 @@
           </NuxtLink>
         </li>
         <li>
+          <NuxtLink to="/commodities" class="nav-link">
+            <span class="nav-icon">&#9679;</span> Commodities
+          </NuxtLink>
+        </li>
+        <li>
           <NuxtLink to="/scenarios/new" class="nav-link">
             <span class="nav-icon">+</span> New Simulation
           </NuxtLink>

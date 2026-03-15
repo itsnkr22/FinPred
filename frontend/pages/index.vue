@@ -22,6 +22,30 @@
       </div>
     </div>
 
+    <!-- Commodity Ticker -->
+    <div class="section commodity-section">
+      <div class="section-header">
+        <h2>Commodity Prices</h2>
+        <NuxtLink to="/commodities">
+          <button class="btn-secondary-sm">View All</button>
+        </NuxtLink>
+      </div>
+      <div v-if="commodities.length > 0" class="commodity-ticker">
+        <div v-for="c in commodities" :key="c.commodity" class="card commodity-card">
+          <div class="commodity-name">{{ c.name }}</div>
+          <div class="commodity-price">${{ c.price.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</div>
+          <div class="commodity-change" :class="c.change >= 0 ? 'up' : 'down'">
+            {{ c.change >= 0 ? '+' : '' }}{{ c.change_percent.toFixed(2) }}%
+          </div>
+        </div>
+      </div>
+      <div v-else class="commodity-ticker">
+        <div class="card commodity-card" v-for="i in 3" :key="i">
+          <div class="commodity-name loading-text">Loading...</div>
+        </div>
+      </div>
+    </div>
+
     <div class="section">
       <div class="section-header">
         <h2>Recent Scenarios</h2>
@@ -69,10 +93,13 @@
 
 <script setup lang="ts">
 import type { Scenario } from "~/types/scenario";
+import type { CommodityPrice } from "~/types/commodity";
 
 const { listScenarios } = useScenarios();
+const { getAllPrices } = useCommodities();
 
 const scenarios = ref<Scenario[]>([]);
+const commodities = ref<CommodityPrice[]>([]);
 const loading = ref(true);
 
 const completedCount = computed(() => scenarios.value.filter(s => s.status === "completed").length);
@@ -80,10 +107,14 @@ const runningCount = computed(() => scenarios.value.filter(s => s.status === "ru
 
 onMounted(async () => {
   try {
-    const result = await listScenarios();
-    scenarios.value = result.items;
+    const [scenarioResult, commodityResult] = await Promise.allSettled([
+      listScenarios(),
+      getAllPrices(),
+    ]);
+    if (scenarioResult.status === "fulfilled") scenarios.value = scenarioResult.value.items;
+    if (commodityResult.status === "fulfilled") commodities.value = commodityResult.value;
   } catch (e) {
-    console.error("Failed to load scenarios:", e);
+    console.error("Failed to load dashboard:", e);
   } finally {
     loading.value = false;
   }
@@ -166,6 +197,59 @@ onMounted(async () => {
 .loading, .empty-state {
   text-align: center;
   padding: 40px;
+  color: var(--color-text-secondary);
+}
+
+.commodity-section {
+  margin-bottom: 32px;
+}
+
+.commodity-ticker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.commodity-card {
+  padding: 16px 20px;
+}
+
+.commodity-name {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.commodity-price {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.commodity-change {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.commodity-change.up {
+  color: var(--color-buy);
+}
+
+.commodity-change.down {
+  color: var(--color-sell);
+}
+
+.btn-secondary-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.loading-text {
   color: var(--color-text-secondary);
 }
 </style>

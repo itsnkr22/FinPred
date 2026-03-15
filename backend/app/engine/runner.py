@@ -13,6 +13,7 @@ from app.database import async_session
 from app.engine.agent_factory import LLMAgent, create_camel_agent
 from app.engine.environment import SimulatedEnvironment
 from app.engine.influence import propagate_influence
+from app.ingestion.commodity_prices import fetch_all_commodities
 from app.engine.metrics import aggregate_tick_metrics, calculate_p_impact, calculate_stance_ratios
 from app.engine.personas import PERSONA_CONFIGS
 from app.models.agent import Agent
@@ -82,6 +83,15 @@ class SimulationRunner:
                     self.llm_agents[str(agent_dict["id"])] = llm_agent
                 except Exception as e:
                     logger.warning(f"Failed to create LLM agent: {e}")
+
+        # Fetch commodity prices for environment context
+        try:
+            commodity_prices = await fetch_all_commodities()
+            if commodity_prices:
+                self.environment.update_commodity_prices(commodity_prices)
+                logger.info(f"Loaded {len(commodity_prices)} commodity prices")
+        except Exception as e:
+            logger.warning(f"Could not fetch commodity prices: {e}")
 
         logger.info(
             f"Simulation initialized: {len(self.agents)} agents, "
@@ -201,6 +211,16 @@ class SimulationRunner:
                 for i in tick_interactions
             ],
             "metrics": tick_metrics,
+            "commodities": [
+                {
+                    "commodity": p.commodity,
+                    "name": p.name,
+                    "price": p.price,
+                    "change": p.change,
+                    "change_percent": p.change_percent,
+                }
+                for p in (self.environment.commodity_prices or [])
+            ],
         })
 
         return tick_interactions
@@ -334,37 +354,79 @@ class SimulationRunner:
                     "Diamond hands! Loading up more shares. This dip is a gift.",
                     "YOLO'd my paycheck. Apes together strong!",
                     "The DD checks out. I'm going all in. Not financial advice.",
+                    "Oil ripping, gold flying. Time to load up on commodity plays!",
+                    "Physical silver is the play. Banks are short, we squeeze.",
                 ],
                 "SELL": [
                     "Taking profits here, this feels like a top.",
                     "Paper handing out. Something doesn't feel right.",
                     "Sold everything. The hedgies are up to something.",
+                    "Oil crashing, gold dumping. Getting out before it gets worse.",
                 ],
                 "HOLD": [
                     "Holding steady. Not selling until we moon.",
                     "Nothing has changed. Still bullish long term.",
                     "HODLing. Not letting them shake me out.",
+                    "Watching commodities closely. Waiting for a clear signal.",
                 ],
             },
             "hft_algo": {
-                "BUY": ["Signal: BUY | RSI oversold, volume spike +340%, momentum reversal detected."],
-                "SELL": ["Signal: SELL | RSI overbought 78.3, volume declining, mean reversion target -2.1%."],
-                "HOLD": ["Signal: NEUTRAL | Insufficient conviction. Spread within normal range."],
+                "BUY": [
+                    "Signal: BUY | RSI oversold, volume spike +340%, momentum reversal detected.",
+                    "Signal: BUY | WTI crude breakout above 50DMA, gold correlation +0.87, momentum confirmed.",
+                ],
+                "SELL": [
+                    "Signal: SELL | RSI overbought 78.3, volume declining, mean reversion target -2.1%.",
+                    "Signal: SELL | Commodity index mean reversion triggered. Silver spread widening -1.4%.",
+                ],
+                "HOLD": [
+                    "Signal: NEUTRAL | Insufficient conviction. Spread within normal range.",
+                    "Signal: NEUTRAL | Oil-equity correlation unstable. Awaiting regime confirmation.",
+                ],
             },
             "institutional": {
-                "BUY": ["Fundamentals remain strong. Adding to core positions on this pullback."],
-                "SELL": ["Reducing exposure. Valuation multiples stretched beyond historical norms."],
-                "HOLD": ["Maintaining current allocation. Awaiting Q-data before rebalancing."],
+                "BUY": [
+                    "Fundamentals remain strong. Adding to core positions on this pullback.",
+                    "Increasing commodity allocation. Real assets hedge against persistent inflation.",
+                ],
+                "SELL": [
+                    "Reducing exposure. Valuation multiples stretched beyond historical norms.",
+                    "Trimming commodity overweight. Demand indicators softening across sectors.",
+                ],
+                "HOLD": [
+                    "Maintaining current allocation. Awaiting Q-data before rebalancing.",
+                    "Commodity positioning neutral. Watching OPEC+ and Fed signals.",
+                ],
             },
             "macro_hedge": {
-                "BUY": ["Risk-on positioning. Yield curve steepening signals growth ahead."],
-                "SELL": ["Aggressive short. Credit spreads widening, systemic risk elevating."],
-                "HOLD": ["Flat. Waiting for FOMC clarity before committing capital."],
+                "BUY": [
+                    "Risk-on positioning. Yield curve steepening signals growth ahead.",
+                    "Long gold, long oil. Dollar weakness cycle just beginning. Rate cuts incoming.",
+                    "Silver-gold ratio at extremes. Going long silver as industrial demand accelerates.",
+                ],
+                "SELL": [
+                    "Aggressive short. Credit spreads widening, systemic risk elevating.",
+                    "Shorting crude. Demand destruction accelerating. China PMI contracting.",
+                ],
+                "HOLD": [
+                    "Flat. Waiting for FOMC clarity before committing capital.",
+                    "Commodity complex range-bound. Need geopolitical catalyst to break either way.",
+                ],
             },
             "finfluencer": {
-                "BUY": ["THIS CHANGES EVERYTHING! I just went ALL IN. Here's why you should too..."],
-                "SELL": ["I'm OUT. Sold everything this morning. This is going to CRASH."],
-                "HOLD": ["Everyone calm down. Here's what's REALLY going on behind the scenes..."],
+                "BUY": [
+                    "THIS CHANGES EVERYTHING! I just went ALL IN. Here's why you should too...",
+                    "Gold to $3,000 is INEVITABLE. I'm loading up physical and miners. Stack while you can!",
+                    "Oil is about to EXPLODE. OPEC is squeezing supply and nobody's paying attention!",
+                ],
+                "SELL": [
+                    "I'm OUT. Sold everything this morning. This is going to CRASH.",
+                    "Sold all my gold. The rally is OVER. Here's what the smart money is doing instead...",
+                ],
+                "HOLD": [
+                    "Everyone calm down. Here's what's REALLY going on behind the scenes...",
+                    "Commodities are at a crossroads. Here's my EXACT game plan for oil, gold, and silver...",
+                ],
             },
         }
 

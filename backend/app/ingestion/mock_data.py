@@ -62,6 +62,34 @@ def get_mock_market_data() -> list[dict]:
             "timestamp": datetime.utcnow().isoformat(),
             "sentiment": 0.6,
         },
+        {
+            "source": "bloomberg",
+            "content": "WTI crude surges past $90 as OPEC+ signals deeper production cuts. Energy stocks rally broadly. Inflation concerns resurface.",
+            "author": "Bloomberg Commodities",
+            "timestamp": datetime.utcnow().isoformat(),
+            "sentiment": -0.3,
+        },
+        {
+            "source": "twitter",
+            "content": "Gold breaking $2,400. Central banks can't stop buying. This is the beginning of the end for dollar hegemony. Load up on physical.",
+            "author": "@GoldBugMike",
+            "timestamp": datetime.utcnow().isoformat(),
+            "sentiment": 0.7,
+        },
+        {
+            "source": "reddit",
+            "content": "DD: Silver is the most undervalued commodity on the planet. Industrial demand from solar + EV is about to explode. Gold-to-silver ratio at 85 is historically extreme. $50 silver by EOY.",
+            "author": "u/SilverStackerPro",
+            "timestamp": datetime.utcnow().isoformat(),
+            "sentiment": 0.8,
+        },
+        {
+            "source": "cnbc",
+            "content": "Oil prices could hit $100 if Middle East tensions escalate further, Goldman Sachs warns. Brent crude up 3% today.",
+            "author": "CNBC Energy",
+            "timestamp": datetime.utcnow().isoformat(),
+            "sentiment": -0.4,
+        },
     ]
 
 
@@ -95,6 +123,39 @@ SAMPLE_SCENARIOS = [
         "environment_vars": {
             "market_volatility": "high",
             "sector_focus": "tech",
+            "election_year": False,
+            "fed_stance": "neutral",
+        },
+    },
+    {
+        "name": "Oil Supply Shock",
+        "description": "OPEC+ announces surprise 2M barrel/day production cut amid Middle East tensions",
+        "seed_event": "BREAKING: OPEC+ announces emergency 2 million barrel/day production cut effective immediately. Saudi Arabia cites 'market stabilization' but analysts point to escalating Middle East tensions. WTI crude surges 12% to $95/barrel. Airlines and shipping stocks plunge. Gold rallies as safe-haven demand spikes.",
+        "environment_vars": {
+            "market_volatility": "extreme",
+            "sector_focus": "commodities",
+            "election_year": False,
+            "fed_stance": "neutral",
+        },
+    },
+    {
+        "name": "Gold Rush: Dollar Collapse Fear",
+        "description": "US credit downgrade triggers flight to gold and silver",
+        "seed_event": "BREAKING: Fitch downgrades US sovereign credit rating to AA citing 'fiscal deterioration and debt ceiling brinkmanship.' Gold surges past $2,500/oz, silver jumps 8%. US Dollar Index drops to 2-year low. Treasury yields spike as foreign holders dump US debt. Central banks globally accelerate gold reserves accumulation.",
+        "environment_vars": {
+            "market_volatility": "extreme",
+            "sector_focus": "commodities",
+            "election_year": False,
+            "fed_stance": "dovish",
+        },
+    },
+    {
+        "name": "Silver Squeeze 2.0",
+        "description": "Retail investors coordinate a massive silver buying campaign",
+        "seed_event": "BREAKING: Reddit's r/WallStreetSilver coordinates largest physical silver buying campaign in history. COMEX silver inventories drop 15% in 48 hours. Silver spikes to $35/oz. Major banks with short positions face margin calls. #SilverSqueeze trends #1 globally. Physical dealers report nationwide shortages.",
+        "environment_vars": {
+            "market_volatility": "high",
+            "sector_focus": "commodities",
             "election_year": False,
             "fed_stance": "neutral",
         },

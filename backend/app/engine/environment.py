@@ -3,6 +3,8 @@
 import random
 from uuid import UUID
 
+from app.ingestion.commodity_prices import CommodityPrice
+
 
 class SimulatedEnvironment:
     """Maintains two concurrent feeds and serves personalized content to agents."""
@@ -12,6 +14,7 @@ class SimulatedEnvironment:
         self.environment_vars = environment_vars
         self.twitter_feed: list[dict] = []
         self.reddit_feed: list[dict] = []
+        self.commodity_prices: list[CommodityPrice] = []
         self._initialize_feeds()
 
     def _initialize_feeds(self):
@@ -99,6 +102,17 @@ class SimulatedEnvironment:
                      f"Sector={self.environment_vars.get('sector_focus', 'general')}")
         lines.append("")
 
+        # Include commodity prices for data-driven personas
+        if self.commodity_prices and persona_type in ("hft_algo", "institutional", "macro_hedge"):
+            lines.append("=== Commodity Prices ===")
+            for p in self.commodity_prices:
+                direction = "▲" if p.change >= 0 else "▼"
+                lines.append(
+                    f"{p.name}: ${p.price:.2f} {direction} {abs(p.change):.2f} "
+                    f"({p.change_percent:+.2f}%)"
+                )
+            lines.append("")
+
         for item in top_items:
             platform_tag = "[X]" if item["platform"] == "twitter" else "[Reddit]"
             name = item.get("display_name", "System")
@@ -118,6 +132,10 @@ class SimulatedEnvironment:
                 if item["id"] == parent_str:
                     item["engagement"] = item.get("engagement", 0) + 1
                     return
+
+    def update_commodity_prices(self, prices: list[CommodityPrice]):
+        """Update the environment with latest commodity prices."""
+        self.commodity_prices = prices
 
     def get_trending_topics(self) -> list[str]:
         """Extract trending topics from recent high-engagement posts."""
